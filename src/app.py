@@ -2,33 +2,15 @@ from flask import Flask , request , jsonify ,Response
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import json_util
-from decouple import config as config_decouple
+
 # 
 
-#app = Flask(__name__)
+app = Flask(__name__)
 #app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/mongoshu"
-#app.config["MONGO_URI"] = "mongodb+srv://apohies:b64EXr4RYm0pojls@cluster0.ykyig.mongodb.net/pymongo?retryWrites=true&w=majority"
-#mongo = PyMongo(app)
+app.config["MONGO_URI"] = "mongodb+srv://apohies:b64EXr4RYm0pojls@cluster0.ykyig.mongodb.net/pymongo?retryWrites=true&w=majority"
+mongo = PyMongo(app)
 
 
-def create_app(enviroment):
-    app = Flask(__name__)
-    app.config["MONGO_URI"] = "mongodb+srv://apohies:b64EXr4RYm0pojls@cluster0.ykyig.mongodb.net/pymongo?retryWrites=true&w=majority"
-    mongo = PyMongo(app)
-
-    app.config.from_object(enviroment)
-
-    with app.app_context():
-        db.init_app(app)
-        db.create_all()
-
-    return app
-
-enviroment = config['production']
-if config_decouple('PRODUCTION', default=False):
-    enviroment = config['production']
-
-app = create_app(enviroment)
 
 
 @app.route('/img/',methods=['GET'])
