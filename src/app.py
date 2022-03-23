@@ -1,12 +1,23 @@
-from flask import Flask , request , jsonify ,Response
+from flask import Flask , request , jsonify ,Response , redirect, url_for
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import json_util
+import os
+from werkzeug.utils import secure_filename
+import cv2
+import base64
+import io
+import PIL.Image as Image 
+from byte_array import byte_data
 
-# 
+
+UPLOAD_FOLDER = '.\src\space'
+UPLOAD_FOLDER1 = '.\src\trace'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 #app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/mongoshu"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["MONGO_URI"] = "mongodb+srv://apohies:b64EXr4RYm0pojls@cluster0.ykyig.mongodb.net/pymongo?retryWrites=true&w=majority"
 mongo = PyMongo(app)
 
@@ -50,7 +61,65 @@ def not_found(error=None):
         'status':404
     })
     response.status_code = 404
-    return response    
+    return response 
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+@app.route('/apostata', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            
+            image = cv2.imread(f'.\src\space\{filename}')
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            cv2.imwrite('.\src\space\Test_gray.jpg', gray)
+            return redirect(url_for('upload_file',
+                                    filename=filename))
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
+
+
+@app.route('/check', methods=['GET'])
+def check():
+    image = open("src/space/onion.png",'rb')
+    image_read = image.read()
+    image_64_encode = base64.b64encode(image_read)
+    b = base64.b64decode(image_64_encode)
+    
+    user = mongo.db.products.insert_one({'base64':image_64_encode})
+    img = Image.open(io.BytesIO(b))
+    img.save('castle.png')
+    
+
+   
+
+    return "enconde"
+
+
 
 if __name__ == "__main__":
     app.run(debug=False)
