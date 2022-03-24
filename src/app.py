@@ -9,6 +9,7 @@ import base64
 import io
 import PIL.Image as Image 
 from byte_array import byte_data
+import conection
 
 
 UPLOAD_FOLDER = '.\src\space'
@@ -18,7 +19,7 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 #app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/mongoshu"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config["MONGO_URI"] = "mongodb+srv://apohies:b64EXr4RYm0pojls@cluster0.ykyig.mongodb.net/pymongo?retryWrites=true&w=majority"
+app.config["MONGO_URI"] = conection.cast
 mongo = PyMongo(app)
 
 
